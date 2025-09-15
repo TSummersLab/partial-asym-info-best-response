@@ -2,7 +2,7 @@
 % players have perfect information about the states.
 
 %% Problem Data Definition
-clear; close all;
+clear; close all; clc;
 
 % State and input data
 n = 4;  % number of states
@@ -52,7 +52,7 @@ W = G * (W1 + W2) * G';
 %% Zero-sum Game with Perfect Information
 tol = 1e-6;
 max_iter = 1e3;
-[K1, K2, total_cost] = value_iteration_zero_sum(A, B1, B2, Q, R1, R2, W, tol, max_iter);
+[K1, K2, total_cost] = value_iteration_zero_sum(A, B1, -B2, Q, R1, R2, W, tol, max_iter);
 
 %% Pursuit-evasion Simulation
 T = 150; % time horizon
@@ -146,10 +146,10 @@ function [K1, K2, total_cost] = value_iteration_zero_sum(A, B1, B2, Q, R1, R2, W
         Plast = P;
 
         % Zero-sum case
-        K1 = -(R1 + B1' * P * B1 - B1' * P * B2 * (R2 + B2' * P * B2) \ B2' * P * B1) \ (B1' * P * A - B1' * P * B2 * (R2 + B2' * P * B2) \ B2' * P * A);
-        K2 = -(R2 + B2' * P * B2 - B2' * P * B1 * (R1 + B1' * P * B1) \ B1' * P * B2) \ (B2' * P * A - B2' * P * B1 * (R1 + B1' * P * B1) \ B1' * P * A);
+        K1 = -(R1 + B1'*P*B1 - B1'*P*B2 * ((R2 + B2'*P*B2) \ B2'*P*B1)) \ (B1'*P*A - B1'*P*B2 * ((R2 + B2'*P*B2) \ B2'*P*A));
+        K2 = -(R2 + B2'*P*B2 - B2'*P*B1 * ((R1 + B1'*P*B1) \ B1'*P*B2)) \ (B2'*P*A - B2'*P*B1 * ((R1 + B1'*P*B1) \ B1'*P*A));
 
-        P = A' * P * A + Q - [A' * P * B1, A' * P * B2] / [R1 + B1' * P * B1, B1' * P * B2; B2' * P * B1, R2 + B2' * P * B2] * [B1' * P * A; B2' * P * A];
+        P = A'*P*A + Q - [A'*P*B1 A'*P*B2] * ([R1 + B1'*P*B1 B1'*P*B2; B2'*P*B1 R2 + B2'*P*B2] \ [B1'*P*A; B2'*P*A]);
 
         norm_error = norm(P - Plast);
         
